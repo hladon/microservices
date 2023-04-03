@@ -26,11 +26,18 @@ public class SongService {
         return repository.save(info);
     }
 
-    public Optional<SongInfo> findSong(Integer id) {
-        return repository.findById(id);
+    public byte[] findSong(Integer id) throws Exception {
+        var info=repository.findById(id);
+        if (info.isEmpty())
+            return null;
+        return s3repository.downloadFile(info.get().getFileKey());
     }
 
     public void deleteSongs(List<Integer> ids) {
+        var infos=repository.findAllById(ids);
+        for (SongInfo info:infos){
+            s3repository.deleteObject(info.getFileKey());
+        }
         repository.deleteByIdList(ids);
     }
 }
