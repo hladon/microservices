@@ -1,20 +1,33 @@
 package com.example.Resource_service.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.Data;
+import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Entity
-@Data
 @NoArgsConstructor
+@Entity
+@Getter
+@Setter
 public class SongInfo {
+    private static final long serialVersionUID = 1L;
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    Integer id;
-    @JsonIgnore
-    String fileKey;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @Column
+    private String fileName;
+
+    @Column
+    private String filePath;
+
+    @Column
+    private String version;
+
+    public SongInfo(String fileName, String filePath, String version) {
+        this.fileName = fileName;
+        this.filePath = filePath;
+        this.version = version;
+    }
 }

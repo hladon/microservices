@@ -1,6 +1,6 @@
 package com.services;
 
-import com.models.Song;
+import com.models.SongMetaData;
 import org.springframework.stereotype.Service;
 import com.repository.SongRepository;
 
@@ -15,11 +15,11 @@ public class SongService {
         this.repository = repository;
     }
 
-    public Song saveSong(Song song){
+    public SongMetaData saveSong(SongMetaData song){
         return repository.save(song);
     }
 
-    public Optional<Song> findSong(Integer id){
+    public Optional<SongMetaData> findSong(Integer id){
         return repository.findById(id);
     }
 

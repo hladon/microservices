@@ -1,6 +1,6 @@
 package com.repository;
 
-import com.models.Song;
+import com.models.SongMetaData;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -12,9 +12,9 @@ import java.util.List;
 
 @Repository
 @Transactional
-public interface SongRepository extends CrudRepository<Song,Integer> {
+public interface SongRepository extends CrudRepository<SongMetaData,Integer> {
 
     @Modifying
-    @Query("DELETE FROM Song e WHERE e.songId IN :ids")
+    @Query("DELETE FROM SongMetaData e WHERE e.songId IN :ids")
     void deleteByIdList(@Param("ids") List<Integer> ids);
 }

@@ -1,54 +1,59 @@
 package com.example.Resource_service.repository;
 
-import org.springframework.stereotype.Component;
-import software.amazon.awssdk.awscore.exception.AwsServiceException;
-import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import java.io.IOException;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectResult;
+import com.amazonaws.services.s3.model.S3Object;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.io.InputStream;
+import java.util.Map;
+import java.util.Optional;
 
-@Component
-public class S3repository {
-    private static final String BUCKET = "my-bucket-name";
-    private S3Client s3Client;
+@Service
+@Slf4j
+public class S3repository  {
+    @Autowired
+    private AmazonS3 amazonS3;
+    @Autowired
+    private FileMetaRepository fileMetaRepository;
 
-    public S3repository() {
-        this.s3Client = S3Client.builder().build();
+    public PutObjectResult uploadFile(
+            String path,
+            String fileName,
+            Optional<Map<String, String>> optionalMetaData,
+            InputStream inputStream) {
+        ObjectMetadata objectMetadata = new ObjectMetadata();
+
+        optionalMetaData.ifPresent(map -> {
+            if (!map.isEmpty()) {
+                map.forEach(objectMetadata::addUserMetadata);
+            }
+        });
+        log.debug("Path: " + path + ", FileName:" + fileName);
+        return amazonS3.putObject(path, fileName, inputStream, objectMetadata);
     }
 
-    public void uploadFile(String fileName, InputStream inputStream)
-            throws AwsServiceException, IOException {
-
-        PutObjectRequest request = PutObjectRequest.builder()
-                .bucket(BUCKET)
-                .key(fileName)
-                .build();
-
-        s3Client.putObject(request,
-                RequestBody.fromInputStream(inputStream, inputStream.available()));
-
+    public S3Object downloadFile(String path, String fileName) {
+        return amazonS3.getObject(path, fileName);
+    }
+    public S3Object downloadFile(String path, String fileName,long start, long end) {
+        GetObjectRequest getObjectRequest = new GetObjectRequest(path, fileName)
+                .withRange(start, end);
+        S3Object objectPortion = amazonS3.getObject(getObjectRequest);
+        return objectPortion;
     }
 
-    public byte[] downloadFile(String fileName) throws Exception{
-        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                .bucket(BUCKET)
-                .key(fileName)
-                .build();
-
-        var object= s3Client.getObject(getObjectRequest);
-        return object.readAllBytes();
+    public ObjectMetadata getMetaData(String path, String fileName){
+        return amazonS3.getObjectMetadata(path, fileName);
     }
 
-    public void deleteObject(String fileName){
-        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-                .bucket(BUCKET)
-                .key(fileName)
-                .build();
+    public void deleteObject(String path, String fileName){
+        amazonS3.deleteObject(path,fileName);
 
-        s3Client.deleteObject(deleteObjectRequest);
     }
 }

@@ -12,8 +12,8 @@ import java.util.List;
 
 @Repository
 @Transactional
-public interface Resources extends CrudRepository<SongInfo,Integer> {
+public interface FileMetaRepository extends CrudRepository<SongInfo,Integer> {
     @Modifying
-    @Query("DELETE FROM Song e WHERE e.songId IN :ids")
+    @Query("DELETE FROM SongInfo e WHERE e.id IN :ids")
     void deleteByIdList(@Param("ids") List<Integer> ids);
 }

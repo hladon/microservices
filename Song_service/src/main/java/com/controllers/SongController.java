@@ -1,11 +1,11 @@
 package com.controllers;
 
-import com.models.Song;
+import com.models.SongMetaData;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import com.services.SongService;
 
 import java.util.HashMap;
@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
+@Slf4j
 public class SongController {
     private SongService songService;
 
@@ -21,9 +22,9 @@ public class SongController {
     }
 
     @PostMapping("/songs")
-    public ResponseEntity<Object> saveSong(@Valid @RequestBody Song song){
-
-        Song savedSong=songService.saveSong(song);
+    public ResponseEntity<Object> saveSong(@RequestBody SongMetaData song){
+        log.info("Received for storage metaData: "+song.toString());
+        SongMetaData savedSong=songService.saveSong(song);
         Map<String,Integer> body=new HashMap<>();
         body.put("id",savedSong.getSongId());
         return new ResponseEntity<>(body, HttpStatus.OK);
