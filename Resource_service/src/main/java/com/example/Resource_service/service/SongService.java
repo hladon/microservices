@@ -9,6 +9,10 @@ import com.example.Resource_service.repository.FileMetaRepository;
 import com.example.Resource_service.repository.S3repository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tika.detect.DefaultDetector;
+import org.apache.tika.detect.Detector;
+import org.apache.tika.io.TikaInputStream;
+import org.apache.tika.mime.MediaType;
 import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.mp3.Mp3Parser;
 import org.apache.tika.sax.BodyContentHandler;
@@ -84,15 +88,16 @@ public class SongService {
         songMetaData.setResourceId(id);
         return retrieveMetaData(metaData,songMetaData);
     }
-    public boolean isFileMP3(MultipartFile file){
-        try {
-            byte[] bytes = file.getBytes();
-            if (bytes.length > 2 && bytes[0] == 'I' && bytes[1] == 'D' && bytes[2] == '3') {
-                return true;            }
-        }catch (IOException ex){
-            return false;
+    public boolean isFileMP3(MultipartFile file) throws IOException{
+        Detector detector = new DefaultDetector();
+        TikaInputStream tikaInputStream = TikaInputStream.get(file.getInputStream());
+        MediaType mediaType = detector.detect(tikaInputStream, new Metadata());
+        tikaInputStream.close();
+        if (mediaType.equals(MediaType.audio("mpeg")) || mediaType.equals(MediaType.audio("mp3"))) {
+           return true;
+        } else {
+           return false;
         }
-        return false;
     }
 
     public SongMetaData retrieveMetaData(InputStream stream,SongMetaData songMetaData){
